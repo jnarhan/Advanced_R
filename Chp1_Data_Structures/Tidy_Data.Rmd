@@ -1,0 +1,15 @@
+---
+title: "Tidy Data"
+author: "Jay Narhan"
+data: "2017-11-8"
+output: html_notebook
+---
+
+“tidying”: structuring data values to make the process of data analysis as easy as possible.
+
+Variables - what are the things in your dataset that can change?
+Observation - a measurement on the same observational unit 
+
+```{r}
+library()
+```

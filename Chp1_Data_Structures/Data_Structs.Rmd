@@ -1,0 +1,215 @@
+---
+title: "R Refresher Notebook"
+author: "Jay Narhan"
+output: html_notebook
+---
+
+## Creating Atomic Vectors
+Vectors are a central component of R, not just another data structure. A vector can contain either numbers, strings, or logical values but not a mixture.
+The c(...) operator can construct a vector from simple elements:
+
+```{r}
+dbl_vars <- c(1, 2.5, 4.7)   # Defining doubles (aka numeric)
+int_vars <- c(1L, 6L, 10L)   # 'L' denotes integer
+log_vars <- c(T, F, FALSE)
+char_vars <- c("these are", "some strings")
+```
+
+c(...) will flatten vector if arguments are themselves vectors or nested vectors:
+
+```{r}
+concat_vars <- c(c(1,2,3), c(4,5,6), c(7,8, c(9,10)))
+concat_vars
+```
+
+### Coercion
+
+Data elements can coexist in a *vector* only if they have the same "mode" (same atomic data type):
+```{r}
+print(int_vars)
+is.atomic(int_vars)
+mode(int_vars)              # Notice that integers and doubles are described as "numeric""
+
+print(c(1, F, 'test'))      # Downgraded to characters in order to accomdate all constituent elements
+is.atomic(c(1, F, 'test'))  # Note: vector is downgraded to atomic values, in this case character data
+mode(c(1, F, 'test'))
+```
+
+Technically, above is an example of coercion of data types and will often happen automatically. It can be quite helpful, for example finding the total number of Trues in vector via ```sum(c(TRUE, TRUE, FALSE, FALSE, FALSE))``` which yields `r sum(c(TRUE, TRUE, FALSE, FALSE, FALSE))`, or to find the proportion of Trues by using ```mean(c(TRUE, TRUE, FALSE, FALSE, FALSE))``` which is `r mean(c(TRUE, TRUE, FALSE, FALSE, FALSE))`. In both cases, logical values have been coerced to numeric values (1's and 0's).
+
+In programming, if any confusion could arise, you should explicitly cast the data type using e.g. as.integer()
+
+```{r}
+as.integer(c("-1", 1))
+```
+
+### Scalars
+```{r}
+is.vector(10)               # In R - no scalars (0d), 'scalars' stored as 1d elements i.e. atomic vector
+str(10)
+str(10L)
+```
+
+### Tests and Types
+
+```{r}
+typeof(int_vars)
+mode(int_vars)       # notice the mode for doubles or integers is numeric
+is.integer(int_vars)
+
+typeof(dbl_vars)
+mode(dbl_vars)       # notice the mode for doubles or integers is numeric
+is.integer(dbl_vars)
+is.double(dbl_vars)
+```
+## Lists
+
+Elements within a list can be of any type. Create using list() instead of c().
+
+```{r}
+x <- list( 1:5, 'a', c(T, FALSE, F, TRUE, T), c(2.3, 7.9))
+str(x)
+```
+
+Lists can contain lists
+```{r}
+recu_list <- list( list( list( c(1,2,3), 'a')))
+str(recu_list)
+
+str(recu_list)
+is.recursive(recu_list)
+```
+
+```{r}
+x <- list( list(1,2), c(3,4))
+str(x)
+```
+
+If combining atomic vectors and lists, c() will coerce the vectors to lists, before combining them:
+```{r}
+y <- c(list(1,2), c(3,4))
+str(y)
+
+# Explaination: c(3,4) is coerced to being a list (a list of 2 items with numeric values (scalars) 3 and 4 for each list entry)
+str(as.list(c(3,4)))
+
+# These two lists are then flattened via c() into one list. Remember c() flattens stuff.
+```
+
+unlist() can be used to convert a list into an atomic vector (if elements in the list are different types, coercion rules are applied).
+
+```{r}
+str(y)
+unlist(y)
+
+str(recu_list)
+unlist(recu_list)
+```
+
+## Attributes
+
+### Factors
+```{r}
+z <- read.csv(text = "value\n12\n1\n. \n9")
+z
+```
+
+```{r}
+str(z)
+```
+
+The '. ' value, makes R read it as a character vector, which is loaded into R by the default action of treating strings as factors.
+
+```{r}
+z <- read.csv(text = "value\n12\n1\n. \n9", na.strings = '. ')
+z
+```
+
+```{r}
+str(z)
+```
+
+The default action of treating strings as factors is sub-optimal because the loading functions may not be aware of all the possible factors. Best to load with `StringsAsFactors = False` (avoid changing the global option as this may have ramifications when integrating in external code).
+
+## Matricies & Arrays
+
+Adding a dim() attribute to atomic vector will create a multi-d array
+
+```{r}
+c <- 1:6
+str(c)
+
+dim(c) <- c(2,3)
+str(c)
+c
+```
+
+Generally use matrix() and array()
+
+```{r}
+d <- matrix(1:6, ncol = 3, nrow = 2)
+d
+
+dim(d) <- c(3,2)
+d
+```
+
+```{r}
+length(d)
+dim(d)
+nrow(d)
+ncol(d)
+```
+
+```{r}
+rownames(d) <- c("A", "B", "C")
+colnames(d) <- c("a", "b")
+d
+```
+
+```{r}
+e <- array(1:6, dim = c(2,3,2))
+e
+```
+
+```{r}
+length(e)
+dim(e)
+```
+
+
+## Dataframes
+
+A list of equal-length vectors.
+
+```{r}
+df <- data.frame(x = 1:3, y = c('a','b','c'))
+str(df)
+```
+
+The default behaviour is to turn strings into factors .. counter by:
+
+```{r}
+df <- data.frame(x = 1:3, y = c('a','b','c'), stringsAsFactors = FALSE)
+str(df)
+df
+```
+
+### Combining Data Frames
+
+```{r}
+z <- data.frame(z = 3:1)
+z
+```
+
+
+```{r}
+cbind(df,z)
+```
+
+
+```{r}
+rbind(df, data.frame(x = 10:13, y = c('d','e','f', 'g')))
+
+str(rbind(df, data.frame(x = 10:13, y = c('d','e','f', 'g'))))
+```
